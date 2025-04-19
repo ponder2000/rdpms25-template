@@ -1,6 +1,6 @@
 APP_NAME = app
-DOCKER_REPO = jaysaha/edge-timeseries-playback
-RELEASE_VERSION := "3.0.28"
+DOCKER_REPO = ""
+RELEASE_VERSION := ""
 
 run:
 	@go mod tidy
