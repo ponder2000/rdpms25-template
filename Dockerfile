@@ -7,6 +7,6 @@ ENV GIN_MODE=release
 
 WORKDIR /app
 
-COPY bin/alpine/edge_playback .
+COPY bin/alpine/app .
 
 CMD [ "./app" ]
