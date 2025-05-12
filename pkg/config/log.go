@@ -18,7 +18,7 @@ func setupLog(conf *logConf) *slog.Logger {
 	}
 
 	if conf.MaxSize == 0 {
-		conf.MaxSize = 1024
+		conf.MaxSize = 256
 	}
 	if conf.MaxAge == 0 {
 		conf.MaxAge = 7
