@@ -4,6 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -27,7 +28,7 @@ func setupLog(conf *logConf) *slog.Logger {
 	var writer io.Writer
 	if !conf.OnConsole {
 		writer = &lumberjack.Logger{
-			Filename:  "log/app.log",
+			Filename:  path.Join("log", "app.log"),
 			MaxSize:   conf.MaxSize,
 			MaxAge:    conf.MaxAge,
 			Compress:  true,
