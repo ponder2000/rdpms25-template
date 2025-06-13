@@ -26,16 +26,15 @@ func setupLog(conf *logConf) *slog.Logger {
 	}
 
 	var writer io.Writer
-	if !conf.OnConsole {
-		writer = &lumberjack.Logger{
-			Filename:  path.Join("log", "app.log"),
-			MaxSize:   conf.MaxSize,
-			MaxAge:    conf.MaxAge,
-			Compress:  true,
-			LocalTime: true,
-		}
-	} else {
-		writer = os.Stdout
+	writer = &lumberjack.Logger{
+		Filename:  path.Join("log", "app.log"),
+		MaxSize:   conf.MaxSize,
+		MaxAge:    conf.MaxAge,
+		Compress:  true,
+		LocalTime: true,
+	}
+	if conf.OnConsole {
+		writer = io.MultiWriter(writer, os.Stdout)
 	}
 
 	var handler slog.Handler

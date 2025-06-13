@@ -25,8 +25,7 @@ alpine:
 	echo "Output stored in ./bin"
 
 docker:
-	$(MAKE) alpine
-	docker build -t $(APP_NAME) --platform linux/amd64 .
+	docker build -t $(APP_NAME) --platform linux/amd64 --build-arg APP_NAME=$(APP_NAME) --build-arg RELEASE_VERSION=$(RELEASE_VERSION) .
 
 hub:
 	docker tag $(APP_NAME) $(DOCKER_REPO):$(RELEASE_VERSION)
