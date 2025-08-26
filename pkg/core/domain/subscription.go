@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -13,6 +12,7 @@ type OperationType string
 const (
 	OPERATION_Insert OperationType = "Insert"
 	OPERATION_Update OperationType = "Update"
+	OPERATION_Upsert OperationType = "Upsert"
 	OPERATION_Delete OperationType = "Delete"
 	OPERATION_Event  OperationType = "Event"
 )
@@ -46,7 +46,7 @@ func (s *SubscriptionHandler[T]) Subscribe(id string) (<-chan *OperationEvent[T]
 		return nil, fmt.Errorf("subscription already exists with id %s", id)
 	}
 
-	ownedChannel := make(chan *OperationEvent[T])
+	ownedChannel := make(chan *OperationEvent[T], 100)
 	s.subscriptions[id] = ownedChannel
 	// applog.InfoF("subscribing id=%s", id)
 	return ownedChannel, nil
@@ -70,19 +70,12 @@ func (s *SubscriptionHandler[T]) notify(operation *OperationEvent[T]) {
 	s.RLock()
 	defer s.RUnlock()
 
-	for id, ownedChannel := range s.subscriptions {
-		go func(id string, channel chan<- *OperationEvent[T]) {
-			ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
-			defer cancel()
-
-			select {
-			case <-ctx.Done():
-				slog.Error("unable to send data! unsubscribing...", "err", ctx.Err().Error(), "id", id)
-				_ = s.UnSubscribe(id)
-			case ownedChannel <- operation:
-				// slog.Debug("sent data", "id", id)
-			}
-		}(id, ownedChannel)
+	for subId, ownedChannel := range s.subscriptions {
+		select {
+		case ownedChannel <- operation:
+		default:
+			slog.Error("discarding subscription notification msg cause subscriber unable to handle backpressure", "sub_id", subId, "msg", operation)
+		}
 	}
 }
 
